@@ -1,36 +1,25 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-import { useState } from "react";
-
 const GameController = ({ socket }) => {
-  const [timer, setTimer] = useState("");
-  function sendData(data) {
-    socket.emit("keyPress", data);
+  function handlePressIn(data) {
+    console.log("pressed", data);
+    if (socket) socket.emit("pressIn", data);
   }
 
-  function sendDataRepeatedly(data) {
-    const timer = setInterval(() => {
-      if (socket) socket.emit("keyPress", data);
-    }, 80);
-    setTimer(timer);
-  }
-
-  function handlePressOut() {
-    if (timer) clearInterval(timer);
-    setTimer(null);
+  function handlePressOut(data) {
+    if (socket) socket.emit("pressOut", data);
   }
 
   const keys = ["up", "left", "space", "right", "down"];
   const Buttons = keys.map((data) => (
     <TouchableOpacity
-      onLongPress={() => {
-        sendDataRepeatedly(data);
+      onPressIn={() => {
+        handlePressIn(data);
       }}
-      onPressOut={handlePressOut}
+      onPressOut={() => {
+        handlePressOut(data);
+      }}
       style={styles.button}
-      onPress={() => {
-        sendData(data);
-      }}
       key={data}
     >
       <Text>{data}</Text>

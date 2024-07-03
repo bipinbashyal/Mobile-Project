@@ -32,15 +32,19 @@ def leftClick(sid):
 def rightClick(sid):
     pyautogui.rightClick()
 
+
+# keyboard events
 @sio.event
-def keyPress(sid,data):
-    pyautogui.press(data)
+def pressIn(sid,data):
+    pyautogui.keyDown(data)
+
+@sio.event
+def pressOut(sid,data):
+    pyautogui.keyUp(data)
+
+
 
 def move_mouse(dx, dy):
-    # current_x, current_y = pyautogui.position()
-    # new_x = current_x + dx
-    # new_y = current_y + dy
-    # pyautogui.moveTo(new_x, new_y)
     pyautogui.move(dx,dy)
 
 if __name__ == '__main__':
