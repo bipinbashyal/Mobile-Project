@@ -2,7 +2,6 @@ import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 const GameController = ({ socket }) => {
   function handlePressIn(data) {
-    console.log("pressed", data);
     if (socket) socket.emit("pressIn", data);
   }
 
@@ -10,38 +9,45 @@ const GameController = ({ socket }) => {
     if (socket) socket.emit("pressOut", data);
   }
 
-  const keys = ["up", "left", "space", "right", "down"];
+  const keys = [
+    ["up", "Accelerate"],
+    ["space", "Nitro"],
+    ["down", "Break"],
+  ];
   const Buttons = keys.map((data) => (
     <TouchableOpacity
       onPressIn={() => {
-        handlePressIn(data);
+        handlePressIn(data[0]);
       }}
       onPressOut={() => {
-        handlePressOut(data);
+        handlePressOut(data[0]);
       }}
       style={styles.button}
-      key={data}
+      key={data[1]}
     >
-      <Text>{data}</Text>
+      <Text style={styles.text}>{data[1]}</Text>
     </TouchableOpacity>
   ));
 
   return (
     <View style={styles.container}>
-      <View>{[Buttons[0]]}</View>
-
       <View
         style={{
-          width: 600,
-          padding: 10,
           flexDirection: "row",
-          justifyContent: "space-around",
+          width: "80%",
+          justifyContent: "space-between",
         }}
       >
-        {[Buttons[1], Buttons[2], Buttons[3]]}
+        <View style={{ backgroundColor: "green", borderRadius: 50 }}>
+          {Buttons[0]}
+        </View>
+        <View style={{ backgroundColor: "red", borderRadius: 50 }}>
+          {Buttons[2]}
+        </View>
       </View>
-
-      <View>{[Buttons[4]]}</View>
+      <View style={{ backgroundColor: "blue", borderRadius: 70 }}>
+        {[Buttons[1]]}
+      </View>
     </View>
   );
 };
@@ -49,17 +55,22 @@ const GameController = ({ socket }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "space-around",
-  },
-  button: {
-    margin: "3px",
-    backgroundColor: "gray",
-    height: 80,
-    width: 90,
+    flexDirection: "column-reverse",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "lightblue",
+  },
+  button: {
+    // margin: "3px",
+    height: 130,
+    width: 130,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "white",
   },
 });
 

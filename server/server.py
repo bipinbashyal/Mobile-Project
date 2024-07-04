@@ -10,7 +10,7 @@ sio = socketio.Server(cors_allowed_origins='*')
 app = socketio.WSGIApp(sio)
 
 # Event handler for when a client connects to the server
-@sio.event
+@sio.event        
 def connect(sid, environ):
     print(f'Client connected: {sid}')
 
@@ -18,6 +18,8 @@ def connect(sid, environ):
 @sio.event
 def disconnect(sid):
     print(f'Client disconnected: {sid}')
+
+
 
 # Event handler for custom 'move' event from the client
 @sio.event
@@ -43,6 +45,30 @@ def pressOut(sid,data):
     pyautogui.keyUp(data)
 
 
+
+# tilt Events
+@sio.event
+def tilt(sid,data):
+    if(data>1.5):
+        pyautogui.keyDown("left")
+    elif(data<-1.5):
+        pyautogui.keyDown("right")
+    else:
+        pyautogui.keyUp("left")
+        pyautogui.keyUp("right")
+
+@sio.event
+def tiltLeft(sid,data):
+    print("tiltLeft",data)
+    pyautogui.keyDown(data)
+
+@sio.event
+def tiltRight(sid,data):
+    pyautogui.keyDown(data)
+
+@sio.event
+def noTilt(sid,data):
+    pyautogui.keyUp(data)
 
 def move_mouse(dx, dy):
     pyautogui.move(dx,dy)
