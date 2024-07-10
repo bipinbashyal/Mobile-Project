@@ -1,11 +1,15 @@
 import { DeviceMotion } from "expo-sensors";
 
-const UPDATE_INTERVAL = 300; // Update interval in milliseconds
+const UPDATE_INTERVAL = 100; // Update interval in milliseconds
 
 const TiltDetection = (socket) => {
+  console.log("Inside tilt", socket);
   const onDeviceMotion = ({ accelerationIncludingGravity }) => {
-    const { x, y, z } = accelerationIncludingGravity;
-    socket?.emit("tilt", Number(y.toFixed(1)));
+    const { y } = accelerationIncludingGravity;
+    // console.log(y);
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "tilt", value: y })); // Send the 'y' value as a string
+    }
   };
 
   // Set update interval and add listener

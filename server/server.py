@@ -1,78 +1,58 @@
-import eventlet
-import socketio
-import pyautogui
 
-pyautogui.PAUSE = 0
-pyautogui.FAILSAFE=False
+import asyncio
+import websockets
+import json
+import pyautogui      
 
-# Create a Socket.IO server
-sio = socketio.Server(cors_allowed_origins='*')
-app = socketio.WSGIApp(sio)
+latest_data = None
+button_data=None
 
-# Event handler for when a client connects to the server
-@sio.event        
-def connect(sid, environ):
-    print(f'Client connected: {sid}')
+async def handler(websocket, path):
+    global latest_data,button_data
+    print("connected: ", websocket)
+    try:
+        async for message in websocket:
+            message = json.loads(message)
+            if message['type'] == "pressIn" or message['type']=="pressOut":
+                button_data=message
+            else:
+                latest_data = message
+    finally:
+        print("removed client: ", websocket)
 
-# Event handler for when a client disconnects from the server
-@sio.event
-def disconnect(sid):
-    print(f'Client disconnected: {sid}')
+async def handle_latest_data():
+    global latest_data,button_data
+    while True:              
+        if button_data:
+            data=button_data
+            button_data=None
+            if data['type'] == "pressIn":     
+                pyautogui.keyDown(data['value'])
+            elif data['type'] == "pressOut":
+                pyautogui.keyUp(data['value'])
 
+        if latest_data:
+            data = latest_data
+            latest_data = None  
+            print(data["value"])
 
+            data_value = float(data['value'])
+            if data_value > 1.5:
+                pyautogui.keyDown("left")
+            elif data_value < -1.5:
+                pyautogui.keyDown("right")
+            else:
+                pyautogui.keyUp("left")
+                pyautogui.keyUp("right")
+        await asyncio.sleep(0.001)  
 
-# Event handler for custom 'move' event from the client
-@sio.event
-def move(sid, data):
-    move_mouse(data["dx"],data["dy"])
+async def main():
+    start_server = await websockets.serve(handler, "0.0.0.0", 8080)
+    print("WebSocket server is running on ws://0.0.0.0:8080")
+    await asyncio.gather(
+        start_server.wait_closed(),
+        handle_latest_data()
+    )
 
-@sio.event
-def leftClick(sid):
-    pyautogui.leftClick()
-
-@sio.event
-def rightClick(sid):
-    pyautogui.rightClick()
-
-
-# keyboard events
-@sio.event
-def pressIn(sid,data):
-    pyautogui.keyDown(data)
-
-@sio.event
-def pressOut(sid,data):
-    pyautogui.keyUp(data)
-
-
-
-# tilt Events
-@sio.event
-def tilt(sid,data):
-    if(data>1.5):
-        pyautogui.keyDown("left")
-    elif(data<-1.5):
-        pyautogui.keyDown("right")
-    else:
-        pyautogui.keyUp("left")
-        pyautogui.keyUp("right")
-
-@sio.event
-def tiltLeft(sid,data):
-    print("tiltLeft",data)
-    pyautogui.keyDown(data)
-
-@sio.event
-def tiltRight(sid,data):
-    pyautogui.keyDown(data)
-
-@sio.event
-def noTilt(sid,data):
-    pyautogui.keyUp(data)
-
-def move_mouse(dx, dy):
-    pyautogui.move(dx,dy)
-
-if __name__ == '__main__':
-    # Start the server
-    eventlet.wsgi.server(eventlet.listen(('', 3000)), app)
+if __name__ == "__main__":
+    asyncio.run(main())

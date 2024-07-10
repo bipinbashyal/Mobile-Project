@@ -1,12 +1,25 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { useEffect, useState } from "react";
+import Socket from "../utils/socket";
 
-const GameController = ({ socket }) => {
+const GameController = ({ route }) => {
+  const address = route.params;
+  console.log(address);
+  const [socket, setSocket] = useState(null);
+  useEffect(() => {
+    setSocket(Socket(address));
+  }, []);
   function handlePressIn(data) {
-    if (socket) socket.emit("pressIn", data);
+    // if (socket) socket.emit("pressIn", data);
+    if (socket) {
+      console.log(data);
+      socket.send(JSON.stringify({ type: "pressIn", value: data }));
+    }
   }
-
   function handlePressOut(data) {
-    if (socket) socket.emit("pressOut", data);
+    if (socket) {
+      socket.send(JSON.stringify({ type: "pressOut", value: data }));
+    }
   }
 
   const keys = [
