@@ -8,9 +8,9 @@ const GameController = ({ route }) => {
   const [socket, setSocket] = useState(null);
   useEffect(() => {
     setSocket(Socket(address));
+    // return () => socket.close();
   }, []);
   function handlePressIn(data) {
-    // if (socket) socket.emit("pressIn", data);
     if (socket) {
       console.log(data);
       socket.send(JSON.stringify({ type: "pressIn", value: data }));
@@ -22,44 +22,50 @@ const GameController = ({ route }) => {
     }
   }
 
-  const keys = [
-    ["up", "Accelerate"],
-    ["space", "Nitro"],
-    ["down", "Break"],
-  ];
-  const Buttons = keys.map((data) => (
-    <TouchableOpacity
-      onPressIn={() => {
-        handlePressIn(data[0]);
-      }}
-      onPressOut={() => {
-        handlePressOut(data[0]);
-      }}
-      style={styles.button}
-      key={data[1]}
-    >
-      <Text style={styles.text}>{data[1]}</Text>
-    </TouchableOpacity>
-  ));
+  const Buttons = [
+    ["w", "O"],
+    ["a", "T"],
+    ["s", "X"],
+    ["d", "Y"],
+    ["d", "A"],
+    ["d", "B"],
+  ].map((data) => {
+    return (
+      <TouchableOpacity
+        key={data[1]}
+        style={styles.button}
+        onPressIn={() => {
+          handlePressIn(data[0]);
+        }}
+        onPressOut={() => {
+          handlePressOut(data[0]);
+        }}
+      >
+        <Text style={styles.buttonText}>{data[1]}</Text>
+      </TouchableOpacity>
+    );
+  });
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: "row",
-          width: "80%",
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ backgroundColor: "green", borderRadius: 50 }}>
-          {Buttons[0]}
+      <View style={styles.twoButtons}>{[Buttons[0], Buttons[1]]}</View>
+      <View style={styles.twoButtons}>{[Buttons[2], Buttons[3]]}</View>
+      <View style={[styles.twoButtons, { marginTop: 20 }]}>
+        {Buttons[4]}
+        <View>
+          <TouchableOpacity
+            style={styles.button}
+            onPressIn={() => {
+              handlePressIn("space");
+            }}
+            onPressOut={() => {
+              handlePressOut("space");
+            }}
+          >
+            <Text style={[styles.buttonText, styles.space]}>Tilt:{0}</Text>
+          </TouchableOpacity>
         </View>
-        <View style={{ backgroundColor: "red", borderRadius: 50 }}>
-          {Buttons[2]}
-        </View>
-      </View>
-      <View style={{ backgroundColor: "blue", borderRadius: 70 }}>
-        {[Buttons[1]]}
+        {Buttons[5]}
       </View>
     </View>
   );
@@ -68,22 +74,29 @@ const GameController = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column-reverse",
-    alignItems: "center",
+    width: "100%",
     justifyContent: "center",
-    backgroundColor: "lightblue",
+    alignItems: "center",
   },
   button: {
-    // margin: "3px",
-    height: 130,
-    width: 130,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 40,
+    paddingVertical: 20,
+    margin: 8,
+    backgroundColor: "#ccc",
+    borderRadius: 10,
   },
-  text: {
-    fontSize: 25,
+  twoButtons: {
+    width: "90%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  space: {
+    paddingHorizontal: 90,
+  },
+
+  buttonText: {
+    fontSize: 24,
     fontWeight: "bold",
-    color: "white",
   },
 });
 

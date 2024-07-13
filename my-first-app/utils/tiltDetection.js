@@ -8,7 +8,7 @@ const TiltDetection = (socket) => {
     const { y } = accelerationIncludingGravity;
     // console.log(y);
     if (socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: "tilt", value: y })); // Send the 'y' value as a string
+      socket.send(JSON.stringify({ type: "tilt", value: y.toFixed(1) })); // Send the 'y' value as a string
     }
   };
 
